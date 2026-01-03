@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
 """
-网格交易系统启动脚本
+Скрипт запуска системы сеточной торговли
 
-独立启动网格交易系统
+Автономный запуск системы сеточной торговли
 
-⚠️ 【重要】Lighter 交易所用户必读：
+⚠️ 【ВАЖНО】Обязательно к прочтению для пользователей биржи Lighter:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-由于 Lighter SDK (v0.1.4) 的底层 C 库存在 Bug，脚本无法自动设置逐仓（isolated）模式。
+Из-за ошибки в базовой C библиотеке Lighter SDK (v0.1.4), скрипт не может автоматически установить режим isolated (изолированной маржи).
 
-🔧 解决方案：
-1. 登录 Lighter 交易所网站 (https://app.lighter.xyz)
-2. 手动为每个交易对设置保证金模式和杠杆倍数
-3. 设置完成后，运行本脚本即可正常交易
+🔧 Решение:
+1. Войдите на сайт биржи Lighter (https://app.lighter.xyz)
+2. Вручную установите режим маржи и кредитное плечо для каждой торговой пары
+3. После настройки запустите этот скрипт для нормальной торговли
 
-📝 建议配置：
-   - 主流币（BTC/ETH）：Cross 或 Isolated，10-20倍杠杆
-   - 小市值币（MEGA/VIRTUAL）：Cross 或 Isolated，3-5倍杠杆
-   - 做空操作：建议至少 3 倍杠杆
+📝 Рекомендуемые настройки:
+   - Основные монеты (BTC/ETH): Cross или Isolated, кредитное плечо 10-20x
+   - Малая капитализация (MEGA/VIRTUAL): Cross или Isolated, кредитное плечо 3-5x
+   - Операции шорт: рекомендуется минимум 3x кредитное плечо
 
-💡 提示：
-   - 配置文件中的 margin_mode 和 leverage 仅作为参考，不会自动设置
-   - 网页端设置一次后，脚本会使用该设置，无需每次重复设置
-   - 详细说明见：docs/fixes/lighter_margin_mode_sdk_bug.md
+💡 Подсказки:
+   - margin_mode и leverage в конфигурационном файле служат только для справки, не устанавливаются автоматически
+   - После настройки в веб-интерфейсе один раз, скрипт будет использовать эти настройки, не требуется повторная настройка
+   - Подробное описание см.: docs/fixes/lighter_margin_mode_sdk_bug.md
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
-# 🔥 加载环境变量（必须在其他导入之前）
+# 🔥 Загрузка переменных окружения (должна быть перед другими импортами)
 from dotenv import load_dotenv
 from pathlib import Path as EnvPath
 env_path = EnvPath(__file__).parent / '.env'
@@ -58,45 +58,45 @@ from decimal import Decimal
 import argparse
 import logging
 
-# 添加项目根目录到路径
+# Добавление корневой директории проекта в путь
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-# 🔥 配置优化的日志系统（简洁清晰，不丢失信息）
+# 🔥 Настройка оптимизированной системы логирования (краткий и ясный, без потери информации)
 setup_optimized_logging(use_colored=True)
 
 
-# 导入交易所适配器
+# Импорт адаптеров бирж
 
 
 async def load_config(config_path: str) -> dict:
     """
-    加载配置文件
+    Загрузка конфигурационного файла
 
     Args:
-        config_path: 配置文件路径
+        config_path: Путь к конфигурационному файлу
 
     Returns:
-        配置字典
+        Словарь конфигурации
     """
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
         return config
     except Exception as e:
-        print(f"❌ 加载配置文件失败: {e}")
+        print(f"❌ Ошибка загрузки конфигурационного файла: {e}")
         raise
 
 
 def create_grid_config(config_data: dict) -> GridConfig:
     """
-    创建网格配置对象
+    Создание объекта конфигурации сетки
 
     Args:
-        config_data: 配置数据
+        config_data: Данные конфигурации
 
     Returns:
-        网格配置对象
+        Объект конфигурации сетки
     """
     grid_config = config_data['grid_system']
     grid_type = GridType(grid_config['grid_type'])
